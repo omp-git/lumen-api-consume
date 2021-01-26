@@ -10,7 +10,7 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\UserListResource;
+use App\Http\Resources\Api\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -30,6 +30,6 @@ class UsersController extends Controller
             $users->offset(($request->input('page') - 1) * $offset)->limit($offset);
         }
         $users = $users->get();
-        return response()->json(['users' => UserListResource::collection($users)]);
+        return response()->json(['users' => UserResource::collection($users)]);
     }
 }

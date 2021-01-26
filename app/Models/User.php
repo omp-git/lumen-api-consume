@@ -32,6 +32,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         'name', 'mobile', 'avatar'
     ];
 
+    protected $dates = ['created_at'];
+
     /**
      * The attributes excluded from the model's JSON form.
      *

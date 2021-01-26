@@ -61,6 +61,7 @@ $app->singleton(
 
 $app->configure('auth');
 $app->configure('setting');
+$app->configure('database');
 
 /*
 |--------------------------------------------------------------------------

@@ -10,6 +10,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,12 +32,7 @@ class AuthController extends Controller
         $me = auth()->guard('api')->user();
         if($me) {
             return response()->json([
-                'me' => [
-                    'name'          => $me->name,
-                    'mobile'        => $me->mobile,
-                    'avatar'        => $me->avater,
-                    'created_at'    => $me->created_at,
-                    ],
+                'me' => new UserResource($me),
                 'status' => true
             ], 200);
         }
