@@ -30,6 +30,6 @@ class UsersController extends Controller
             $users->offset(($request->input('page') - 1) * $offset)->limit($offset);
         }
         $users = $users->get();
-        return response()->json(['users' => UserResource::collection($users)]);
+        return response()->json(['users' => UserResource::collection($users)], 200);
     }
 }

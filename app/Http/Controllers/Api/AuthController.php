@@ -13,7 +13,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -32,8 +31,7 @@ class AuthController extends Controller
         $me = auth()->guard('api')->user();
         if($me) {
             return response()->json([
-                'me' => new UserResource($me),
-                'status' => true
+                'me' => new UserResource($me)
             ], 200);
         }
         return response()->json(['message' => 'not authorized', 'status' => false], HTTP_URL_STRIP_ALL);
@@ -64,9 +62,7 @@ class AuthController extends Controller
 
             $user->save();
 
-
             return response()->json(['user' => $user, 'message' => 'CREATED'], 201);
-
         } catch (\Exception $e) {
             return response()->json(['messagesdf' => 'User Registration Failed!'], 409);
         }
@@ -83,29 +79,37 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $this->validate($request, [
-            'mobile' => 'required|string',
+            'mobile' => ['required', 'string','regex:/^09(1[0-9]|3[1-9]|2[1-9])( |-)?[0-9]{3}( |-)?[0-9]{4}$/'],
             'password' => 'required|string',
         ]);
 
         $credentials = $request->only(['mobile', 'password']);
 
-        if (! $token = Auth::attempt($credentials)) {
+        if (! $token = auth()->attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
         return $this->respondWithToken($token);
     }
 
+    public function logout()
+    {
+        auth('api')->logout();
+        return response()->json(['message' => __('User logged out!')], 200);
+    }
+
     protected function respondWithToken($token)
     {
         $user = auth()->guard('api')->user();
+        $now = new \DateTime("now", new \DateTimeZone('UTC'));
+        $life_time = auth()->guard('api')->factory()->getTTL() * 60;
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
             ],
-            'token' => $token,
+            'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => Auth::factory()->getTTL() * 60
+            'expires_in' => ($now->getTimestamp() + (int) ($life_time > 0 ? $life_time : 31536000))
         ], 200);
     }
 }
