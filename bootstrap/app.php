@@ -63,6 +63,7 @@ $app->configure('auth');
 $app->configure('setting');
 $app->configure('database');
 $app->configure('logging');
+$app->configure('jwt');
 
 /*
 |--------------------------------------------------------------------------

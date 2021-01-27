@@ -10,7 +10,7 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\Api\UserResource;
+use App\Http\Resources\Api\UserCollectionResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -23,13 +23,16 @@ class UsersController extends Controller
 
     public function index(Request $request)
     {
-        $this->validate($request, ['page' => 'nullable|numeric']);
+        $this->validate($request, ['page' => 'nullable|numeric|min:0', 'offset' => 'nullable|numeric|min:0']);
         $users = User::select('name', 'mobile', 'avatar', 'created_at')->whereActive(true);
         if($request->filled('page')) {
-            $offset = config('setting.offset');
+            $offset = $request->filled('offset') ? $request->input('offset') :config('setting.offset');
             $users->offset(($request->input('page') - 1) * $offset)->limit($offset);
+            $users = $users->paginate($offset);
         }
-        $users = $users->get();
-        return response()->json(['users' => UserResource::collection($users)], 200);
+        else {
+            $users = $users->get();
+        }
+        return response()->json(['data' => (new UserCollectionResource($users))->response()->getData(true)], 200);
     }
 }
