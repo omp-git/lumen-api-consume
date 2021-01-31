@@ -21,26 +21,28 @@ class CorsMiddleware
      */
     public function handle($request, Closure $next)
     {
-        $headers = [
-            'Access-Control-Allow-Origin'      => '*',
-            'Access-Control-Allow-Methods'     => 'POST, GET, OPTIONS, PUT, DELETE',
-            'Access-Control-Allow-Credentials' => 'true',
-            'Access-Control-Max-Age'           => '86400',
-            'Access-Control-Allow-Headers'     => 'Content-Type, Authorization, X-Requested-With'
-        ];
+        $allowedOrigins = ['http://localhost:8000', 'https://vue-admin-panel-1.herokuapp.com'];
+        $origin = $_SERVER['APP_URL'];
+        if (in_array($origin, $allowedOrigins)) {
+            $headers = [
+                'Access-Control-Allow-Origin' => $origin,
+                'Access-Control-Allow-Methods' => 'POST, GET, OPTIONS, PUT, DELETE',
+                'Access-Control-Allow-Credentials' => 'true',
+                'Access-Control-Max-Age' => '86400',
+                'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With'
+            ];
 
-        if ($request->isMethod('OPTIONS'))
-        {
-            return response()->json('{"method":"OPTIONS"}', 200, $headers);
+            if ($request->isMethod('OPTIONS')) {
+                return response()->json('{"method":"OPTIONS"}', 200, $headers);
+            }
+
+            $response = $next($request);
+            foreach ($headers as $key => $value) {
+                $response->header($key, $value);
+            }
+            return $response;
         }
-
-        $response = $next($request);
-        foreach($headers as $key => $value)
-        {
-            $response->header($key, $value);
-        }
-
-        return $response;
+        return $next($request);
     }
     // For security, you should probably specify a URL:
     // ->header('Access-Control-Allow-Origin', 'localhost')
